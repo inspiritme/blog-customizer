@@ -14,8 +14,9 @@ import {
 	ArticleStateType,
 } from 'src/constants/articleProps';
 import styles from './ArticleParamsForm.module.scss';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import clsx from 'clsx';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
 	states: {
@@ -27,7 +28,14 @@ type ArticleParamsFormProps = {
 };
 export const ArticleParamsForm = ({ states }: ArticleParamsFormProps) => {
 	const { formState, setFormState, setPageState } = states;
-	const [isOpen, setOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const formRef = useRef<HTMLFormElement>(null);
+
+	useOutsideClickClose({
+		rootRef: formRef,
+		isOpen: isMenuOpen,
+		onChange: () => setIsMenuOpen(false),
+	});
 
 	const handleChange =
 		(field: keyof ArticleStateType) => (option: OptionType) => {
@@ -46,10 +54,16 @@ export const ArticleParamsForm = ({ states }: ArticleParamsFormProps) => {
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={() => setOpen((prev) => !prev)} />
+			<ArrowButton
+				isOpen={isMenuOpen}
+				onClick={() => setIsMenuOpen((prev) => !prev)}
+			/>
 			<aside
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isMenuOpen,
+				})}>
 				<form
+					ref={formRef}
 					className={styles.form}
 					onReset={(e) => {
 						e.preventDefault();
